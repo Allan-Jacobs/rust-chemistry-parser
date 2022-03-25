@@ -1,7 +1,7 @@
-trait ASTNode {}
+pub trait ASTNode {}
 
 
-trait Groupable: std::fmt::Debug {}
+pub trait Groupable: std::fmt::Debug {}
 
 #[derive(Debug)]
 struct Element {

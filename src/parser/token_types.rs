@@ -1,4 +1,4 @@
-trait Token {}
+pub trait Token {}
 
 #[derive(Debug)]
 enum ParenType {
