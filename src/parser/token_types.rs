@@ -1,34 +1,16 @@
-pub trait Token {}
+use core::fmt::Debug;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum ParenType {
     OPEN,
     CLOSE
 }
 
-#[derive(Debug)]
-pub struct Element {
-    pub value: String // TODO: use enum
+#[derive(Debug, PartialEq)]
+pub enum Tokens {
+    Element(String),
+    Number(u16),
+    Paren(ParenType),
+    Plus,
+    Yields,
 }
-
-#[derive(Debug)]
-pub struct Number {
-    pub value: i16
-}
-
-#[derive(Debug)]
-pub struct Paren {
-    pub value: ParenType
-}
-
-#[derive(Debug)]
-pub struct Plus();
-
-#[derive(Debug)]
-pub struct Yields();
-
-impl Token for Element {}
-impl Token for Number {}
-impl Token for Paren {}
-impl Token for Plus {}
-impl Token for Yields {}
