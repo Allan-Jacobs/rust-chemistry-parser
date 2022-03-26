@@ -4,27 +4,27 @@ pub trait ASTNode {}
 pub trait Groupable: std::fmt::Debug {}
 
 #[derive(Debug)]
-struct Element {
-    value: &'static str
+pub struct Element {
+    pub value: String
 }
 
 #[derive(Debug)]
-struct ForumulaUnit {
-    value: Vec<Box<dyn Groupable>>,
-    coeffecient: i16
+pub struct ForumulaUnit {
+    pub value: Vec<Box<dyn Groupable>>,
+    pub coeffecient: i16
 }
 
 #[derive(Debug)]
-struct Expression {
-    value: Vec<Box<ForumulaUnit>>
+pub struct Expression {
+    pub value: Vec<Box<ForumulaUnit>>
 }
 
 #[derive(Debug)]
-struct Equation(Expression, Expression);
+pub struct Equation(Expression, Expression);
 
 #[derive(Debug)]
-struct Group {
-    value: Vec<Box<dyn Groupable>>
+pub struct Group {
+    pub value: Vec<Box<dyn Groupable>>
 }
 
 impl Groupable for Element {}
