@@ -3,6 +3,7 @@ use super::{
     token_types::Tokens,
 };
 
+/// Using an iterator (usually `LazyTokenStream`), parse tokens and return a result with the root node
 pub fn parse<'a, T: Iterator<Item = Result<Box<Tokens>, String>>>(stream: T) -> Result<Box<Node>, String> {
     let mut stream = stream.peekable();
     let mut paren_level = 0;

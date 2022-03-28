@@ -1,11 +1,13 @@
 use super::token_types::{ParenType, Tokens};
 use std::{iter::{Iterator, Peekable}, str::Chars};
 
+/// An iterator that iterates over a string and parses it lazily
 pub struct LazyTokenStream<'a> {
     string_iter: Peekable<Chars<'a>>,
 }
 
 impl <'a> LazyTokenStream<'a> {
+    /// Construct a new `LazyTokenStream` from the string
     pub fn new(string: &'a String) -> Self {
         Self {
             string_iter: string.chars().peekable()
