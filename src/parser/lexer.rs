@@ -7,7 +7,7 @@ pub struct LazyTokenStream<'a> {
 }
 
 impl <'a> LazyTokenStream<'a> {
-    fn new(string: &'a String) -> Self {
+    pub fn new(string: &'a String) -> Self {
         Self {
             string_iter: string.chars().peekmore()
         }
