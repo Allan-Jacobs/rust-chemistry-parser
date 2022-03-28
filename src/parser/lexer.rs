@@ -1,15 +1,14 @@
 use super::token_types::{ParenType, Tokens};
-use peekmore::{PeekMore, PeekMoreIterator};
-use std::{iter::Iterator, str::Chars};
+use std::{iter::{Iterator, Peekable}, str::Chars};
 
 pub struct LazyTokenStream<'a> {
-    string_iter: PeekMoreIterator<Chars<'a>>,
+    string_iter: Peekable<Chars<'a>>,
 }
 
 impl <'a> LazyTokenStream<'a> {
     pub fn new(string: &'a String) -> Self {
         Self {
-            string_iter: string.chars().peekmore()
+            string_iter: string.chars().peekable()
         }
     }
 }

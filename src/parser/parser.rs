@@ -1,12 +1,10 @@
-use peekmore::PeekMore;
-
 use super::{
     ast_types::Node,
     token_types::Tokens,
 };
 
 pub fn parse<'a, T: Iterator<Item = Result<Box<Tokens>, String>>>(stream: T) -> Result<Box<Node>, String> {
-    let mut stream = stream.peekmore();
+    let mut stream = stream.peekable();
     let mut paren_level = 0;
     let mut current_stack = vec!(Box::new(Node::ForumulaUnit(1, vec!())));
     loop {
