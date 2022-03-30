@@ -1,7 +1,7 @@
 use self::{ast_types::Node, lexer::LazyTokenStream};
 
 mod token_types;
-mod ast_types;
+pub mod ast_types;
 mod lexer;
 mod parser;
 

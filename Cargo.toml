@@ -3,6 +3,10 @@ name = "chemistry"
 version = "0.1.0"
 edition = "2021"
 
+[lib]
+name = "chemistry_parser"
+path = "src/lib.rs"
+
 [dependencies]
 csv = "1.1"
 serde = { version = "1", features = ["derive"] }
