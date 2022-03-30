@@ -1,4 +1,4 @@
-use super::token_types::{ParenType, Tokens};
+use crate::token_types::{ParenType, Tokens};
 use std::{iter::{Iterator, Peekable}, str::Chars};
 
 /// An iterator that iterates over a string and parses it lazily

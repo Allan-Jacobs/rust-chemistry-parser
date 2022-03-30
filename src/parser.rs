@@ -1,7 +1,5 @@
-use super::{
-    ast_types::Node,
-    token_types::Tokens,
-};
+use crate::ast_types::Node;
+use crate::token_types::Tokens;
 
 /// Using an iterator (usually `LazyTokenStream`), parse tokens and return a result with the root node
 pub fn parse<'a, T: Iterator<Item = Result<Box<Tokens>, String>>>(stream: T) -> Result<Box<Node>, String> {
