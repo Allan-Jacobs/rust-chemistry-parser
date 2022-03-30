@@ -1,4 +1,4 @@
-# chem-parse
+# chem-parse [![Crates.io](https://img.shields.io/crates/v/chem-parse)](https://crates.io/crates/chem-parse)
 A parser for simple chemical formulas.
 
 ## Get Started
