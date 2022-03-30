@@ -1,12 +1,15 @@
 [package]
-name = "chemistry"
+name = "chem-parse"
 version = "0.1.0"
+authors = ["Allan Jacobs"]
 edition = "2021"
+description = "A parser for simple chemical forumulas."
+readme = "README.md"
+repository = "https://github.com/Allan-Jacobs/rust-chemistry-parser"
+license = "MIT"
+keywords = ["chemistry", "parser"]
+catagories = ["parsing", "science"]
 
 [lib]
-name = "chemistry_parser"
+name = "chem_parse"
 path = "src/lib.rs"
-
-[dependencies]
-csv = "1.1"
-serde = { version = "1", features = ["derive"] }
