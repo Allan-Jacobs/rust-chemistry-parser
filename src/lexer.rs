@@ -15,7 +15,7 @@ impl <'a> LazyTokenStream<'a> {
     }
 }
 
-impl From<LazyTokenStream<'_>> for Result<Vec<Box<Tokens>>, String> {
+impl From<LazyTokenStream<'_>> for Result<Vec<Tokens>, String> {
     fn from(other: LazyTokenStream<'_>) -> Self {
         let mut vec = Vec::new();
         for token in other {
@@ -27,7 +27,7 @@ impl From<LazyTokenStream<'_>> for Result<Vec<Box<Tokens>>, String> {
 }
 
 impl Iterator for LazyTokenStream<'_> {
-    type Item = Result<Box<Tokens>, String>;
+    type Item = Result<Tokens, String>;
 
     fn next(&mut self) -> Option<Self::Item> {
         match self.string_iter.next() {
@@ -43,25 +43,25 @@ impl Iterator for LazyTokenStream<'_> {
                         },
                         Some(_) | None => { break Some(temp.parse::<u16>()
                             .map_err(|e| format!("Could not parse number: {e}"))
-                            .map(|value| Box::new(Tokens::Number(value))));
+                            .map(|value| Tokens::Number(value)));
                         }
                     }
                 }
             },
 
             // parens
-            Some('(') => Some(Ok(Box::new(Tokens::Paren(ParenType::OPEN)))),
-            Some(')') => Some(Ok(Box::new(Tokens::Paren(ParenType::CLOSE)))),
+            Some('(') => Some(Ok(Tokens::Paren(ParenType::OPEN))),
+            Some(')') => Some(Ok(Tokens::Paren(ParenType::CLOSE))),
 
             // plus
-            Some('+') => Some(Ok(Box::new(Tokens::Plus))),
+            Some('+') => Some(Ok(Tokens::Plus)),
 
             // yields
             Some('-') => {
                 match self.string_iter.peek() {
                     Some('>') => {
                         self.string_iter.next();
-                        Some(Ok(Box::new(Tokens::Yields)))
+                        Some(Ok(Tokens::Yields))
                     },
                     Some(_) => Some(Err("Yield sign (->) unfinished".to_owned())),
                     None => None
@@ -81,7 +81,7 @@ impl Iterator for LazyTokenStream<'_> {
                     };
                 }
                 
-                Some(Ok(Box::new(Tokens::Element(temp))))
+                Some(Ok(Tokens::Element(temp)))
             },
 
             Some(c) => Some(Err(format!("Invalid Character: {}", c))),
@@ -102,7 +102,7 @@ mod tests {
 
         assert!(res.is_ok(), "An error occurred while parsing");
 
-        let exp = vec!(Box::new(Tokens::Element("Fe".to_owned())));
+        let exp = vec!(Tokens::Element("Fe".to_owned()));
         
         assert_eq!(exp, res.unwrap());
     }
@@ -117,11 +117,11 @@ mod tests {
         assert!(res.is_ok(), "An error occurred while parsing");
 
         let exp = vec!(
-            Box::new(Tokens::Number(2)),
-            Box::new(Tokens::Element("Fe".to_owned())),
-            Box::new(Tokens::Element("C".to_owned())),
-            Box::new(Tokens::Element("O".to_owned())),
-            Box::new(Tokens::Number(3)),
+            Tokens::Number(2),
+            Tokens::Element("Fe".to_owned()),
+            Tokens::Element("C".to_owned()),
+            Tokens::Element("O".to_owned()),
+            Tokens::Number(3),
         );
         
         assert_eq!(exp, res.unwrap());
@@ -137,20 +137,20 @@ mod tests {
         assert!(res.is_ok(), "An error occurred while parsing: {}", res.err().unwrap() );
 
         let exp = vec!(
-            Box::new(Tokens::Number(2)),
-            Box::new(Tokens::Element("Fe".to_owned())),
-            Box::new(Tokens::Plus),
-            Box::new(Tokens::Element("Na".to_owned())),
-            Box::new(Tokens::Number(2)),
-            Box::new(Tokens::Element("F".to_owned())),
-            Box::new(Tokens::Number(3)),
-            Box::new(Tokens::Yields),
-            Box::new(Tokens::Number(2)),
-            Box::new(Tokens::Element("Fe".to_owned())),
-            Box::new(Tokens::Element("Na".to_owned())),
-            Box::new(Tokens::Plus),
-            Box::new(Tokens::Element("F".to_owned())),
-            Box::new(Tokens::Number(3)),
+            Tokens::Number(2),
+            Tokens::Element("Fe".to_owned()),
+            Tokens::Plus,
+            Tokens::Element("Na".to_owned()),
+            Tokens::Number(2),
+            Tokens::Element("F".to_owned()),
+            Tokens::Number(3),
+            Tokens::Yields,
+            Tokens::Number(2),
+            Tokens::Element("Fe".to_owned()),
+            Tokens::Element("Na".to_owned()),
+            Tokens::Plus,
+            Tokens::Element("F".to_owned()),
+            Tokens::Number(3),
         );
         
         assert_eq!(exp, res.unwrap());

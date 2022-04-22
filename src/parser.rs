@@ -2,14 +2,14 @@ use crate::ast_types::Node;
 use crate::token_types::Tokens;
 
 /// Using an iterator (usually `LazyTokenStream`), parse tokens and return a result with the root node
-pub fn parse<'a, T: Iterator<Item = Result<Box<Tokens>, String>>>(stream: T) -> Result<Box<Node>, String> {
+pub fn parse<'a, T: Iterator<Item = Result<Tokens, String>>>(stream: T) -> Result<Box<Node>, String> {
     let mut stream = stream.peekable();
     let mut paren_level = 0;
     let mut current_stack = vec!(Box::new(Node::ForumulaUnit(1, vec!())));
     loop {
         match stream.next() {
             Some(Err(val)) => return Err(val),
-            Some(Ok(box Tokens::Number(val))) => {
+            Some(Ok(Tokens::Number(val))) => {
                 let fu = current_stack.pop().unwrap();
                 if let box Node::ForumulaUnit(_,vec) = fu {
                     current_stack.push(Box::new(Node::ForumulaUnit(val, vec)));
@@ -17,11 +17,11 @@ pub fn parse<'a, T: Iterator<Item = Result<Box<Tokens>, String>>>(stream: T) -> 
                     return Err("Invalid parent".to_owned());
                 }
             },
-            Some(Ok(box Tokens::Element(val))) => {
+            Some(Ok(Tokens::Element(val))) => {
                 let mut fu = *current_stack.pop().unwrap();
 
                 if let Node::ForumulaUnit(_,ref mut vec) = fu {
-                    if let Some(Ok(box Tokens::Number(count))) = stream.peek() {
+                    if let Some(Ok(Tokens::Number(count))) = stream.peek() {
                         vec.push(Node::Element(*count, val));
                         stream.next();
                     } else {
@@ -33,7 +33,7 @@ pub fn parse<'a, T: Iterator<Item = Result<Box<Tokens>, String>>>(stream: T) -> 
                 }
                 
             },
-            Some(Ok(box Tokens::Plus)) => {
+            Some(Ok(Tokens::Plus)) => {
                 let fu = *current_stack.pop().unwrap();
                 let mut maybe_reactants = current_stack.pop().map(|val| *val);
                 match maybe_reactants {
@@ -56,7 +56,7 @@ pub fn parse<'a, T: Iterator<Item = Result<Box<Tokens>, String>>>(stream: T) -> 
                     },
                 }
             }
-            Some(Ok(box Tokens::Yields)) => {
+            Some(Ok(Tokens::Yields)) => {
                 let fu = *current_stack.pop().unwrap();
                 let mut maybe_reactants = current_stack.pop();
 
@@ -74,11 +74,11 @@ pub fn parse<'a, T: Iterator<Item = Result<Box<Tokens>, String>>>(stream: T) -> 
                     },
                 }
             }
-            Some(Ok(box Tokens::Paren(super::token_types::ParenType::OPEN))) => {
+            Some(Ok(Tokens::Paren(super::token_types::ParenType::OPEN))) => {
                 paren_level += 1;
                 current_stack.push(Box::new(Node::Group(1, vec!())));
             },
-            Some(Ok(box Tokens::Paren(super::token_types::ParenType::CLOSE))) => {
+            Some(Ok(Tokens::Paren(super::token_types::ParenType::CLOSE))) => {
                 if paren_level == 0 {
                     return Err("Invalid closing paren".to_owned());
                 };
@@ -88,7 +88,7 @@ pub fn parse<'a, T: Iterator<Item = Result<Box<Tokens>, String>>>(stream: T) -> 
 
                 match maybe_fu_or_group {
                     Some(box Node::Group(_,ref mut vec)) => {
-                        if let Some(Ok(box Tokens::Number(val))) = stream.peek() {
+                        if let Some(Ok(Tokens::Number(val))) = stream.peek() {
                             if let Node::Group(_,inner_vec) = group {
                                 vec.push(Node::Group(*val, inner_vec));
                             }
@@ -131,20 +131,20 @@ mod tests {
     #[test]
     fn can_parse_equation() {
         let stream = vec!(
-            Box::new(Tokens::Number(2)),
-            Box::new(Tokens::Element("Fe".to_owned())),
-            Box::new(Tokens::Plus),
-            Box::new(Tokens::Element("Na".to_owned())),
-            Box::new(Tokens::Number(2)),
-            Box::new(Tokens::Element("F".to_owned())),
-            Box::new(Tokens::Number(3)),
-            Box::new(Tokens::Yields),
-            Box::new(Tokens::Number(2)),
-            Box::new(Tokens::Element("Fe".to_owned())),
-            Box::new(Tokens::Element("Na".to_owned())),
-            Box::new(Tokens::Plus),
-            Box::new(Tokens::Element("F".to_owned())),
-            Box::new(Tokens::Number(3)),
+            Tokens::Number(2),
+            Tokens::Element("Fe".to_owned()),
+            Tokens::Plus,
+            Tokens::Element("Na".to_owned()),
+            Tokens::Number(2),
+            Tokens::Element("F".to_owned()),
+            Tokens::Number(3),
+            Tokens::Yields,
+            Tokens::Number(2),
+            Tokens::Element("Fe".to_owned()),
+            Tokens::Element("Na".to_owned()),
+            Tokens::Plus,
+            Tokens::Element("F".to_owned()),
+            Tokens::Number(3),
         );
 
         let exp = Node::Equation(
@@ -173,11 +173,11 @@ mod tests {
     #[test]
     fn can_parse_formula_unit() {
         let stream = vec!(
-            Box::new(Tokens::Number(2)),
-            Box::new(Tokens::Element("Fe".to_owned())),
-            Box::new(Tokens::Element("C".to_owned())),
-            Box::new(Tokens::Element("O".to_owned())),
-            Box::new(Tokens::Number(3)),
+            Tokens::Number(2),
+            Tokens::Element("Fe".to_owned()),
+            Tokens::Element("C".to_owned()),
+            Tokens::Element("O".to_owned()),
+            Tokens::Number(3),
         );
 
         let exp = Node::ForumulaUnit(2, vec!(
