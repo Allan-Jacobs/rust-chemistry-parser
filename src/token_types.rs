@@ -52,3 +52,13 @@ pub struct TokenMetadata {
     raw: String,
     location: usize
 }
+
+
+impl TokenMetadata {
+    pub fn new(raw: &str, location: usize) -> Self {
+        Self {
+            raw: raw.into(),
+            location
+        }
+    }
+}
