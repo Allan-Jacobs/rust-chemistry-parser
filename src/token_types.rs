@@ -24,8 +24,8 @@ pub enum Tokens {
 }
 
 impl Tokens {
-    pub fn meta(&self) -> TokenMetadata {
-        match *self {
+    pub fn meta(&self) -> &TokenMetadata {
+        match self {
             Self::Element { meta, data: _ } => meta,
             Self::Number { meta, data: _ } => meta,
             Self::Paren { meta, data: _ } => meta,
@@ -38,11 +38,12 @@ impl Tokens {
 impl PartialEq for Tokens {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
-            (Self::Element { data: l_data, meta: _ }, Self::Element { data: r_data, meta: r_meta }) => l_data == r_data,
-            (Self::Number { data: l_data, meta: _ }, Self::Number { data: r_data, meta: r_meta }) => l_data == r_data,
-            (Self::Paren { data: l_data, meta: _ }, Self::Paren { data: r_data, meta: r_meta }) => l_data == r_data,
-            (Self::Plus { meta: l_meta }, Self::Plus { meta: _ }) => true,
-            (Self::Yields { meta: l_meta }, Self::Yields { meta: _ }) => true,
+            (Self::Element { data: l_data, meta: _ }, Self::Element { data: r_data, meta: _ }) => l_data == r_data,
+            (Self::Number { data: l_data, meta: _ }, Self::Number { data: r_data, meta: _ }) => l_data == r_data,
+            (Self::Paren { data: l_data, meta: _ }, Self::Paren { data: r_data, meta: _ }) => l_data == r_data,
+            (Self::Plus { meta: _ }, Self::Plus { meta: _ }) => true,
+            (Self::Yields { meta: _ }, Self::Yields { meta: _ }) => true,
+            _ => false
         }
     }
 }
@@ -60,5 +61,11 @@ impl TokenMetadata {
             raw: raw.into(),
             location
         }
+    }
+    pub fn raw(&self) -> &String {
+        &self.raw
+    }
+    pub fn loc(&self) -> usize {
+        self.location
     }
 }
