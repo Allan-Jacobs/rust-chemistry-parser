@@ -9,23 +9,23 @@ pub fn parse<'a, T: Iterator<Item = Result<Tokens, String>>>(stream: T) -> Resul
     loop {
         match stream.next() {
             Some(Err(val)) => return Err(val),
-            Some(Ok(Tokens::Number(val))) => {
+            Some(Ok(Tokens::Number{data, meta})) => {
                 let fu = current_stack.pop().unwrap();
                 if let box Node::ForumulaUnit(_,vec) = fu {
-                    current_stack.push(Box::new(Node::ForumulaUnit(val, vec)));
+                    current_stack.push(Box::new(Node::ForumulaUnit(data, vec)));
                 } else {
                     return Err("Invalid parent".to_owned());
                 }
             },
-            Some(Ok(Tokens::Element(val))) => {
+            Some(Ok(Tokens::Element{data, meta})) => {
                 let mut fu = *current_stack.pop().unwrap();
 
                 if let Node::ForumulaUnit(_,ref mut vec) = fu {
-                    if let Some(Ok(Tokens::Number(count))) = stream.peek() {
-                        vec.push(Node::Element(*count, val));
+                    if let Some(Ok(Tokens::Number{ data: count, meta})) = stream.peek() {
+                        vec.push(Node::Element(*count, data));
                         stream.next();
                     } else {
-                        vec.push(Node::Element(1, val));
+                        vec.push(Node::Element(1, data));
                     }
                     current_stack.push(Box::new(fu));
                 } else {
@@ -33,30 +33,30 @@ pub fn parse<'a, T: Iterator<Item = Result<Tokens, String>>>(stream: T) -> Resul
                 }
                 
             },
-            Some(Ok(Tokens::Plus)) => {
+            Some(Ok(Tokens::Plus{meta})) => {
                 let fu = *current_stack.pop().unwrap();
                 let mut maybe_reactants = current_stack.pop().map(|val| *val);
                 match maybe_reactants {
                     Some(Node::Reactants(ref mut vec)) => {
                         vec.push(fu);
                         current_stack.push(Box::new(maybe_reactants.unwrap()));
-                        current_stack.push(Box::new(Node::ForumulaUnit(1, vec!())));
+                        current_stack.push(Box::new(Node::ForumulaUnit(1, vec![])));
                     },
                     Some(Node::Products(ref mut vec)) => {
                         vec.push(fu);
                         current_stack.push(Box::new(maybe_reactants.unwrap()));
-                        current_stack.push(Box::new(Node::ForumulaUnit(1, vec!())));
+                        current_stack.push(Box::new(Node::ForumulaUnit(1, vec![])));
                     },
                     Some(_) => return Err("Invalid plus".to_owned()),
                     None => {
                         if let Node::ForumulaUnit(_,_) = fu {
-                            current_stack.push(Box::new(Node::Reactants(vec!(fu))));
-                            current_stack.push(Box::new(Node::ForumulaUnit(1, vec!())));
+                            current_stack.push(Box::new(Node::Reactants(vec![fu])));
+                            current_stack.push(Box::new(Node::ForumulaUnit(1, vec![])));
                         }
                     },
                 }
             }
-            Some(Ok(Tokens::Yields)) => {
+            Some(Ok(Tokens::Yields{meta})) => {
                 let fu = *current_stack.pop().unwrap();
                 let mut maybe_reactants = current_stack.pop();
 
@@ -64,21 +64,21 @@ pub fn parse<'a, T: Iterator<Item = Result<Tokens, String>>>(stream: T) -> Resul
                     Some(box Node::Reactants(ref mut vec)) => {
                         vec.push(fu);
                         current_stack.push(maybe_reactants.unwrap());
-                        current_stack.push(Box::new(Node::Products(vec!())));
-                        current_stack.push(Box::new(Node::ForumulaUnit(1, vec!())));
+                        current_stack.push(Box::new(Node::Products(vec![])));
+                        current_stack.push(Box::new(Node::ForumulaUnit(1, vec![])));
                     },
                     Some(_) => return Err("Invalid yields location".to_owned()),
                     None => {
-                        current_stack.push(Box::new(Node::Reactants(vec!(fu))));
-                        current_stack.push(Box::new(Node::ForumulaUnit(1, vec!())));
+                        current_stack.push(Box::new(Node::Reactants(vec![fu])));
+                        current_stack.push(Box::new(Node::ForumulaUnit(1, vec![])));
                     },
                 }
             }
-            Some(Ok(Tokens::Paren(super::token_types::ParenType::OPEN))) => {
+            Some(Ok(Tokens::Paren{data: super::token_types::ParenType::OPEN, meta})) => {
                 paren_level += 1;
-                current_stack.push(Box::new(Node::Group(1, vec!())));
+                current_stack.push(Box::new(Node::Group(1, vec![])));
             },
-            Some(Ok(Tokens::Paren(super::token_types::ParenType::CLOSE))) => {
+            Some(Ok(Tokens::Paren{data: super::token_types::ParenType::CLOSE, meta})) => {
                 if paren_level == 0 {
                     return Err("Invalid closing paren".to_owned());
                 };
@@ -88,9 +88,9 @@ pub fn parse<'a, T: Iterator<Item = Result<Tokens, String>>>(stream: T) -> Resul
 
                 match maybe_fu_or_group {
                     Some(box Node::Group(_,ref mut vec)) => {
-                        if let Some(Ok(Tokens::Number(val))) = stream.peek() {
+                        if let Some(Ok(Tokens::Number{data, meta: _})) = stream.peek() {
                             if let Node::Group(_,inner_vec) = group {
-                                vec.push(Node::Group(*val, inner_vec));
+                                vec.push(Node::Group(*data, inner_vec));
                             }
                         }
                         current_stack.push(maybe_fu_or_group.unwrap());
@@ -127,25 +127,27 @@ pub fn parse<'a, T: Iterator<Item = Result<Tokens, String>>>(stream: T) -> Resul
 
 #[cfg(test)]
 mod tests {
+    use crate::token_types::TokenMetadata;
+
     use super::*;
     #[test]
     fn can_parse_equation() {
-        let stream = vec!(
-            Tokens::Number(2),
-            Tokens::Element("Fe".to_owned()),
-            Tokens::Plus,
-            Tokens::Element("Na".to_owned()),
-            Tokens::Number(2),
-            Tokens::Element("F".to_owned()),
-            Tokens::Number(3),
-            Tokens::Yields,
-            Tokens::Number(2),
-            Tokens::Element("Fe".to_owned()),
-            Tokens::Element("Na".to_owned()),
-            Tokens::Plus,
-            Tokens::Element("F".to_owned()),
-            Tokens::Number(3),
-        );
+        let stream = vec![
+            Tokens::Number{data: 2, meta: TokenMetadata::new("2", 0)},
+            Tokens::Element{data: "Fe".to_owned(), meta: TokenMetadata::new("Fe", 1)},
+            Tokens::Plus{meta: TokenMetadata::new("+", 3)},
+            Tokens::Element{data: "Na".to_owned(), meta: TokenMetadata::new("Na", 4)},
+            Tokens::Number{data: 2, meta: TokenMetadata::new("2", 6)},
+            Tokens::Element{data: "F".to_owned(), meta: TokenMetadata::new("F", 7)},
+            Tokens::Number{data: 3, meta: TokenMetadata::new("3", 8)},
+            Tokens::Yields{meta: TokenMetadata::new("->", 9)},
+            Tokens::Number{data: 2, meta: TokenMetadata::new("2", 11)},
+            Tokens::Element{data: "Fe".to_owned(), meta: TokenMetadata::new("Fe", 12)},
+            Tokens::Element{data: "Na".to_owned(), meta: TokenMetadata::new("Na", 14)},
+            Tokens::Plus{meta: TokenMetadata::new("+", 16)},
+            Tokens::Element{data: "F".to_owned(), meta: TokenMetadata::new("F", 17)},
+            Tokens::Number{data: 3, meta: TokenMetadata::new("3", 18)},
+        ];
 
         let exp = Node::Equation(
             Box::new(Node::Reactants(vec!(
@@ -173,11 +175,11 @@ mod tests {
     #[test]
     fn can_parse_formula_unit() {
         let stream = vec!(
-            Tokens::Number(2),
-            Tokens::Element("Fe".to_owned()),
-            Tokens::Element("C".to_owned()),
-            Tokens::Element("O".to_owned()),
-            Tokens::Number(3),
+            Tokens::Number{data: 2, meta: TokenMetadata::new("2", 0)},
+            Tokens::Element{data: "Fe".to_owned(), meta: TokenMetadata::new("Fe", 1)},
+            Tokens::Element{data: "C".to_owned(), meta: TokenMetadata::new("C", 3)},
+            Tokens::Element{data: "O".to_owned(), meta: TokenMetadata::new("O", 4)},
+            Tokens::Number{data: 3, meta: TokenMetadata::new("3", 5)},
         );
 
         let exp = Node::ForumulaUnit(2, vec!(
