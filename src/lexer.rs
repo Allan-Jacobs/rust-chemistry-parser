@@ -30,7 +30,6 @@ impl Iterator for LazyTokenStream<'_> {
     type Item = Result<Tokens, String>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let t = self.string_iter.enumerate(); 
 
         match self.string_iter.next() {
             // numbers
@@ -84,7 +83,7 @@ impl Iterator for LazyTokenStream<'_> {
                     };
                 }
                 
-                Some(Ok(Tokens::Element { data: temp, meta: TokenMetadata::new(&temp, loc) }))
+                Some(Ok(Tokens::Element { data: temp.clone(), meta: TokenMetadata::new(&temp, loc) }))
             },
 
             Some((_, c)) => Some(Err(format!("Invalid Character: {}", c))),
