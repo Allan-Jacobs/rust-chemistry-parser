@@ -1,4 +1,3 @@
-
 // TODO: change Node to be proper types once
 // we get variants as types, eventually
 /// A Node in the AST (abstract syntax tree)
@@ -18,5 +17,5 @@ pub enum Node {
     /// The products side (right) of yeilds (->)
     Products(Vec<Node>),
     /// The whole equation
-    Equation(Box<Node>, Box<Node>)
+    Equation(Box<Node>, Box<Node>),
 }

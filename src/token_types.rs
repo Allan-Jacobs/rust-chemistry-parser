@@ -5,7 +5,7 @@ use core::fmt::Debug;
 #[derive(Debug, PartialEq)]
 pub enum ParenType {
     OPEN,
-    CLOSE
+    CLOSE,
 }
 
 /// A token which may have attached data
@@ -16,10 +16,13 @@ pub enum Tokens {
     /// Numbers e.g. 13. The data is 13u16
     Number { data: u16, meta: TokenMetadata },
     /// Parenthesis e.g. ) The data is ParenType::CLOSE
-    Paren { data: ParenType, meta: TokenMetadata },
+    Paren {
+        data: ParenType,
+        meta: TokenMetadata,
+    },
     /// Plus sign +
-    Plus { meta: TokenMetadata},
-    /// Yields sign -> 
+    Plus { meta: TokenMetadata },
+    /// Yields sign ->
     Yields { meta: TokenMetadata },
 }
 
@@ -29,8 +32,8 @@ impl Tokens {
             Self::Element { meta, data: _ } => meta,
             Self::Number { meta, data: _ } => meta,
             Self::Paren { meta, data: _ } => meta,
-            Self::Plus { meta} => meta,
-            Self::Yields { meta} => meta
+            Self::Plus { meta } => meta,
+            Self::Yields { meta } => meta,
         }
     }
 }
@@ -38,12 +41,39 @@ impl Tokens {
 impl PartialEq for Tokens {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
-            (Self::Element { data: l_data, meta: _ }, Self::Element { data: r_data, meta: _ }) => l_data == r_data,
-            (Self::Number { data: l_data, meta: _ }, Self::Number { data: r_data, meta: _ }) => l_data == r_data,
-            (Self::Paren { data: l_data, meta: _ }, Self::Paren { data: r_data, meta: _ }) => l_data == r_data,
+            (
+                Self::Element {
+                    data: l_data,
+                    meta: _,
+                },
+                Self::Element {
+                    data: r_data,
+                    meta: _,
+                },
+            ) => l_data == r_data,
+            (
+                Self::Number {
+                    data: l_data,
+                    meta: _,
+                },
+                Self::Number {
+                    data: r_data,
+                    meta: _,
+                },
+            ) => l_data == r_data,
+            (
+                Self::Paren {
+                    data: l_data,
+                    meta: _,
+                },
+                Self::Paren {
+                    data: r_data,
+                    meta: _,
+                },
+            ) => l_data == r_data,
             (Self::Plus { meta: _ }, Self::Plus { meta: _ }) => true,
             (Self::Yields { meta: _ }, Self::Yields { meta: _ }) => true,
-            _ => false
+            _ => false,
         }
     }
 }
@@ -51,15 +81,14 @@ impl PartialEq for Tokens {
 #[derive(Debug)]
 pub struct TokenMetadata {
     raw: String,
-    location: usize
+    location: usize,
 }
-
 
 impl TokenMetadata {
     pub fn new(raw: &str, location: usize) -> Self {
         Self {
             raw: raw.into(),
-            location
+            location,
         }
     }
     pub fn raw(&self) -> &String {

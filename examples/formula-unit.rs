@@ -1,5 +1,5 @@
-use std::error::Error;
 use chem_parse::parse;
+use std::error::Error;
 
 fn main() -> Result<(), Box<dyn Error>> {
     let string = String::from("Fe2O3");
