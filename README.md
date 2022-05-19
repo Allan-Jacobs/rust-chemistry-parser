@@ -6,7 +6,7 @@ Add the dependency to your `Cargo.toml` file.
 
 ```toml
 [dependencies]
-chem-parse = "0.1.0"
+chem-parse = "0.3.0"
 ```
 
 Parse a forumula unit
