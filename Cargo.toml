@@ -13,3 +13,6 @@ catagories = ["parsing", "science"]
 [lib]
 name = "chem_parse"
 path = "src/lib.rs"
+
+[dev-dependencies]
+rusty-hook = "^0.11.2"
